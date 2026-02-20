@@ -47,7 +47,7 @@ regd_users.post("/login", (req,res) => {
       let accessToken = jwt.sign({
           data: password
       }, 'access', { expiresIn: 60 * 60 });
-
+      console.log(accessToken);
       // Store access token and username in session
       req.session.authorization = {
           accessToken, username
@@ -65,6 +65,16 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     book.reviews[req.session.authorization.username] = req.body.review;
 
     return res.status(200).json({ message: `Review by ${req.session.authorization.username} added/updated successfully` });
+  } else {
+    return res.status(404).json({ message: "Book not found" });
+  }
+});
+
+// Remove a book review for logged in user
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+  if (books[req.params.isbn]) {
+    delete books[req.params.isbn].reviews[req.session.authorization.username];
+    return res.status(200).json({ message: `Review by ${req.session.authorization.username} removed successfully` });
   } else {
     return res.status(404).json({ message: "Book not found" });
   }
